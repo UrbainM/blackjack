@@ -1,4 +1,5 @@
 #include "hand.h"
+#include <iostream>
 
 Hand::Hand() {
     // Initialize card values

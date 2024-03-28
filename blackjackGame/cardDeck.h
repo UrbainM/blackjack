@@ -1,10 +1,8 @@
 #ifndef CARDDECK_H
 #define CARDDECK_H
 
-#include <iostream>
 #include <string>
 #include <vector>
-#include <map>
 
 using namespace std;
 
@@ -33,6 +31,8 @@ public:
     const vector<Card>& getCards() const { return cards; }
     // Setter (optional)
     void setCards(const vector<Card>& newCards) { cards = newCards; }
+    void shuffle();
+    Card dealCard();
 };
 
 #endif // CARDDECK_H

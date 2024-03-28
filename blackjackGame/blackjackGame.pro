@@ -19,4 +19,3 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     cardDeck.h \
     hand.h \
-    cardDeck.h

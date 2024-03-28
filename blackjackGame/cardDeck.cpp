@@ -1,7 +1,9 @@
-#include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <random>
+#include <ctime>
+#include <algorithm>
+#include <iostream>
 using namespace std;
 
 class Card {
@@ -35,6 +37,21 @@ public:
                                       }
                                     }
                             }
+void shuffle(){ //shuffle algorithm
+    std::mt19937 g(std::time(nullptr)); // Mersenne Twister random number generator
+    std::shuffle(cards.begin(), cards.end(), g); //<algorithm>
+    };
+
+Card dealCard(){ //returns a Card
+    if (cards.empty()){
+        std::cerr << "Deck is empty!" << std::endl;
+        return Card("","");
+        }
+
+        Card dealtCard = cards.back();
+        cards.pop_back();
+        return dealtCard;
+    }
 // Getters
     const vector<Card>& getCards() const { return cards; }
 // Setter (optional)
