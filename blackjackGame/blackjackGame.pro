@@ -8,7 +8,8 @@ CONFIG += c++17 cmdline
 
 SOURCES += \
         hand.cpp \
-        main.cpp
+        main.cpp \
+        cardDeck.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -16,4 +17,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    hand.h
+    cardDeck.h \
+    hand.h \
+    cardDeck.h

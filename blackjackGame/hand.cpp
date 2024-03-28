@@ -1,9 +1,6 @@
-#include "Hand.h"
-#include <iostream>
+#include "hand.h"
 
 Hand::Hand() {
-    cards.clear();
-
     // Initialize card values
     cardValues["2"] = 2;
     cardValues["3"] = 3;
@@ -21,17 +18,20 @@ Hand::Hand() {
 }
 
 void Hand::addCard(const std::string& value, const std::string& suit) {
-    cards.push_back({cardValues[value], suit});
+    cards.push_back(Card(suit, value));
 }
 
 int Hand::calculateTotal() const {
     int total = 0;
     int numAces = 0;
 
-    for (const auto& card : cards) {
-        total += card.value;
-        if (card.value == 11) {  // Ace
-            numAces++;
+    for (const auto& card : cards) { // couldn't get stoi(card.getRank()) to work
+        auto it = cardValues.find(card.getRank()); // auto = map using getRank as key
+        if (it != cardValues.end()) { // if found in cardValues add value to total
+            total += it->second;
+            if (it->second == 11) {  // Ace
+                numAces++;
+            }
         }
     }
 

@@ -4,22 +4,31 @@
 #include <vector>
 #include <string>
 #include <map>
+#include "cardDeck.h"
 
 class Hand {
 private:
-    struct Card {
-        int value;
-        std::string suit;
-    };
-    std::vector<Card> cards;  // Stores the cards in the hand
-    std::map<std::string, int> cardValues; // Map to store card values
+    std::vector<Card> cards;
+    std::map<std::string, int> cardValues;
 
 public:
-    Hand();  // Constructor
-    void addCard(const std::string& value, const std::string& suit);  // Add a card to the hand
-    int calculateTotal() const;  // Calculate the total value of the hand
-    bool hasBlackjack() const;  // Check if the hand is a natural blackjack
-    void showTotal() const; // Show the total value of the hand
+    // Constructor
+    Hand();
+
+    // Add a card to the hand
+    void addCard(const std::string& value, const std::string& suit);
+
+    // Calculate total value of the hand
+    int calculateTotal() const;
+
+    // Check if the hand has a blackjack
+    bool hasBlackjack() const;
+
+    // Show total value of the hand
+    void showTotal() const;
+
+    // Get all cards in the hand
+    const std::vector<Card>& getCards() const { return cards; }
 };
 
-#endif
+#endif // HAND_H

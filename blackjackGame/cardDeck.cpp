@@ -1,7 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 using namespace std;
+
 class Card {
 private:
     string suit;
@@ -16,6 +18,7 @@ public:
     void setSuit(string s) { suit = s; }
     void setRank(string r) { rank = r; }
 };
+
 class DeckOfCards {
 private:
     vector<Card> cards;
