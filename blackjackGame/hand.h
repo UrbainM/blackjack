@@ -24,6 +24,9 @@ public:
     // Check if the hand has a blackjack
     bool hasBlackjack() const;
 
+    // Check if the hand has busted
+    bool isBusted() const;
+
     // Show total value of the hand
     void showTotal() const;
 

@@ -49,6 +49,10 @@ bool Hand::hasBlackjack() const {
     return cards.size() == 2 && calculateTotal() == 21;
 }
 
+bool Hand::isBusted() const {
+    return calculateTotal() > 21;
+}
+
 void Hand::showTotal() const {
     std::cout << "Total: " << calculateTotal() << std::endl;
 }
