@@ -1,62 +1,68 @@
-#include <string>
-#include <vector>
+#include "cardDeck.h"
 #include <random>
-#include <ctime>
 #include <algorithm>
 #include <iostream>
-using namespace std;
+#include <ctime>
 
-class Card {
-private:
-    string suit;
-    string rank;
-public:
-// Constructor
-    Card(string s, string r) : suit(s), rank(r) {}
-// Getters
-    string getSuit() const { return suit; }
-    string getRank() const { return rank; }
-// Setters
-    void setSuit(string s) { suit = s; }
-    void setRank(string r) { rank = r; }
-};
+Card::Card(std::string s, std::string r) : suit(s), rank(r) {}
 
-class DeckOfCards {
-private:
-    vector<Card> cards;
-public:
-// Constructor
-    DeckOfCards() {
-// Initialize the deck with all 52 standard playing cards
-    vector<string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
-    vector<string> ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10",
-                            "Jack", "Queen", "King", "Ace"};
+std::string Card::getSuit() const {
+    return suit;
+}
+
+std::string Card::getRank() const {
+    return rank;
+}
+
+void Card::setSuit(std::string s) {
+    suit = s;
+}
+
+void Card::setRank(std::string r) {
+    rank = r;
+}
+
+DeckOfCards::DeckOfCards() {
+    std::vector<std::string> suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+    std::vector<std::string> ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10",
+                                      "Jack", "Queen", "King", "Ace"};
     for (const auto& suit : suits) {
         for (const auto& rank : ranks) {
             cards.push_back(Card(suit, rank));
-                                      }
-                                    }
-                            }
-void shuffle(){ //shuffle algorithm
-    std::mt19937 g(std::time(nullptr)); // Mersenne Twister random number generator
-    std::shuffle(cards.begin(), cards.end(), g); //<algorithm>
-    };
-
-Card dealCard(){ //returns a Card
-    if (cards.empty()){
-        std::cerr << "Deck is empty!" << std::endl;
-        return Card("","");
         }
-
-        Card dealtCard = cards.back();
-        cards.pop_back();
-        return dealtCard;
     }
-// Getters
-    const vector<Card>& getCards() const { return cards; }
-// Setter (optional)
-    void setCards(const vector<Card>& newCards) { cards = newCards; }
-};
+}
+
+void DeckOfCards::shuffle() {
+    std::mt19937 g(std::time(nullptr));
+    std::shuffle(cards.begin(), cards.end(), g);
+}
+
+Card DeckOfCards::dealCard() {
+    if (cards.empty()) {
+        std::cerr << "Deck is empty!" << std::endl;
+        return Card("", "");
+    }
+
+    Card dealtCard = cards.back();
+    cards.pop_back();
+    // Check if remaining cards fall below 10% of the total deck size;
+    if (cards.size() < 0.1 * 52) {
+        std::cout << "Reshuffling the deck..." << std::endl;
+        shuffle();
+    }
+
+    return dealtCard;
+}
+
+const std::vector<Card>& DeckOfCards::getCards() const {
+    return cards;
+}
+
+void DeckOfCards::setCards(const std::vector<Card>& newCards) {
+    cards = newCards;
+}
+
 /*
 int main() {
 // Create a new deck of cards

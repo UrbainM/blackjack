@@ -4,35 +4,29 @@
 #include <string>
 #include <vector>
 
-using namespace std;
-
 class Card {
 private:
-    string suit;
-    string rank;
+    std::string suit;
+    std::string rank;
+
 public:
-    // Constructor
-    Card(string s, string r) : suit(s), rank(r) {}
-    // Getters
-    string getSuit() const { return suit; }
-    string getRank() const { return rank; }
-    // Setters
-    void setSuit(string s) { suit = s; }
-    void setRank(string r) { rank = r; }
+    Card(std::string s, std::string r);
+    std::string getSuit() const;
+    std::string getRank() const;
+    void setSuit(std::string s);
+    void setRank(std::string r);
 };
 
 class DeckOfCards {
 private:
-    vector<Card> cards;
+    std::vector<Card> cards;
+
 public:
-    // Constructor
     DeckOfCards();
-    // Getters
-    const vector<Card>& getCards() const { return cards; }
-    // Setter (optional)
-    void setCards(const vector<Card>& newCards) { cards = newCards; }
     void shuffle();
     Card dealCard();
+    const std::vector<Card>& getCards() const;
+    void setCards(const std::vector<Card>& newCards);
 };
 
 #endif // CARDDECK_H
