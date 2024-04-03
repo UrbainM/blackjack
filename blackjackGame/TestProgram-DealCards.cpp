@@ -56,17 +56,23 @@ public:
     void setCards(const vector<Card>& newCards) { cards = newCards; }
 };
 
+
+
 // Declare function to place a bet
 int placeYourBet(int, int);
 
-// Declare function to deal a card to the player
-void dealPlayer();
-
-// Declare function to deal a card to the dealer
-void dealDealer();
+// Declare function to deal a card
+void dealCard(vector<Card> &stack, vector<Card> &hand);
 
 // Declare function to clear the player's and dealer's hand after a round ends
-void clearHands();
+void clearHands(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card> &handSplit);
+
+// Declare function to get the curent score of a hand
+int scoreHand(vector<Card> &hand);
+
+// Declare a function to reshuffle the card stack
+void reshuffleStack(vector<Card> &stack, DeckOfCards);
+
 
 int main() {
     // Create a new deck of cards
@@ -77,9 +83,11 @@ int main() {
     int playerTotal = 0;                // used to keep a total of the player's hand
     int dealerTotal = 0;                // used to keep a total of the dealer's hand
     int playerBet = 0;                  // amount of points the player wants to bet each hand
+    int playerSplitBet = 0;             // amount of points the player will bet on the 2nd hand of a split
     int playerBank = STARTING_PIONTS;   // used for live total of the player's available points
     vector<Card> cardStack;             // vector for the entire set of cards
     vector<Card> playerHand;            // vector for the cards in the player's hand
+    vector<Card> playerSplitHand;       // vector for the cards in the player's 2nd hand from a split
     vector<Card> dealerHand;            // vector for the cards in the dealer's hand
 
     cout << "Welcome to Blackjack!" << endl;
@@ -109,7 +117,7 @@ int main() {
 ****************** Uncomment this section to print the full deck of cards *********************/
 
     cout << endl << endl;
-    
+
 // Deal beginning cards - player, dealer, player, dealer
     srand(time(0));
     randomCard = (rand()%(cardStack.size()));
@@ -138,7 +146,28 @@ int main() {
     cout << endl;
     cout << "     " << playerTotal << "                                                   " << dealerTotal << endl;
 
+// Deal 4 more cards to the player's hand
     cout << endl << endl;
+    dealCard(cardStack, playerHand);
+    cout << playerHand.at(playerHand.size()-1).getRank() << " of " << playerHand.at(playerHand.size()-1).getSuit() << endl;
+    dealCard(cardStack, playerHand);
+    cout << playerHand.at(playerHand.size()-1).getRank() << " of " << playerHand.at(playerHand.size()-1).getSuit() << endl;
+    dealCard(cardStack, playerHand);
+    cout << playerHand.at(playerHand.size()-1).getRank() << " of " << playerHand.at(playerHand.size()-1).getSuit() << endl;
+    dealCard(cardStack, playerHand);
+    cout << playerHand.at(playerHand.size()-1).getRank() << " of " << playerHand.at(playerHand.size()-1).getSuit() << endl;
+    cout << endl;
+// Output the score of the player's hand (first 2 cards & additional 4 cards)
+    cout << "SCORE = " << scoreHand(playerHand);
+    cout << endl << endl;
+// Clear everything from the hand vectors
+    clearHands(dealerHand, playerHand, playerSplitHand);
+    cout << dealerHand.size() << "  " << playerHand.size() << "  " << playerSplitHand.size() << endl; // All vectors should be size 0
+    cout << endl << endl;
+    cout << "Before reshuffle = " << cardStack.size() << endl;   // Size of stack before reshuffle
+    reshuffleStack(cardStack, deck);
+    cout << "After reshuffle = " << cardStack.size() << endl;   // Size of stack after reshuffle
+
     return 0;
 }
 
@@ -169,6 +198,38 @@ int placeYourBet(int availablePoints, int maxBet) {
     }
     return inputBet;
 }
+
+// Function to deal a card to a hand
+void dealCard(vector<Card> &stack, vector<Card> &hand) {
+    int randomCard = (rand()%(stack.size()));
+    hand.push_back(stack.at(randomCard));
+    stack.erase((stack.begin() + randomCard));
+    return;
+}
+
+// Function to clear all hands
+void clearHands(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card> &handSplit) {
+    handDealer.clear();
+    handPlayer.clear();
+    handSplit.clear();
+    return;
+}
+
+// Function to get the current hand score
+int scoreHand(vector<Card> &hand) {
+    int score = 0;
+    for (int i = 0; i < hand.size(); i++) {
+        score += hand.at(i).getValue();
+    }
+    return score;
+}
+
+void reshuffleStack(vector<Card> &stack, DeckOfCards newDeck) {
+    stack.clear();
+    stack = newDeck.getCards();
+    return;
+}
+
 
 /*
 
