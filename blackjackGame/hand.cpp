@@ -26,7 +26,7 @@ int Hand::calculateTotal() const {
     int total = 0;
     int numAces = 0;
 
-    for (const auto& card : cards) { // couldn't get stoi(card.getRank()) to work
+    for (const auto& card : cards) {
         auto it = cardValues.find(card.getRank()); // auto = map using getRank as key
         if (it != cardValues.end()) { // if found in cardValues add value to total
             total += it->second;

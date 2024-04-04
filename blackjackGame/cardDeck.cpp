@@ -34,7 +34,7 @@ DeckOfCards::DeckOfCards() {
 }
 
 void DeckOfCards::shuffle() {
-    std::mt19937 g(std::time(nullptr));
+    std::mt19937 g(std::time(nullptr)); // Mersenne Twister random number generator shuffles based on seed of current time.
     std::shuffle(cards.begin(), cards.end(), g);
 }
 
