@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include <cmath>
 #include <thread>
 
 using namespace std;
@@ -25,7 +26,7 @@ public:
     // Setters
     void setSuit(string s) { suit = s; }
     void setRank(string r) { rank = r; }
-    void setRank(int v) { value = v; }
+    void setValue(int v) { value = v; }
 };
 
 
@@ -73,6 +74,9 @@ void clearHands(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card>
 // Declare function to get the curent score of a hand
 int scoreHand(vector<Card> &hand);
 
+// Declare function to change the value of an Ace from 11 to 1
+void changeAce(vector<Card> &hand);
+
 // Declare a function to reshuffle the card stack
 void reshuffleStack(vector<Card> &stack, DeckOfCards);
 
@@ -92,8 +96,12 @@ int main() {
     int playerBet = 0;                  // amount of points the player wants to bet each hand
     int playerSplitBet = 0;             // amount of points the player will bet on the 2nd hand of a split
     int playerBank = STARTING_PIONTS;   // used for live total of the player's available points
-    bool stand = false;                 // bool to use for the player to stand or not
-    bool splitStand = false;            // bool to use for the player to stand or not on the split hand
+    bool stand = false;                 // bool to use for the player to stand or not - also used to skip other play options
+    bool splitStand = false;            // bool to use for the player to stand or not on the split hand - also used to skip other play options
+    bool playerBust = false;            // bool used to indicate if the player's hand is bust or not
+    bool playerSplitBust = false;       // bool used to indicate if the player's split hand is bust or not
+    bool dealerBlackjack = false;       // bool used to indicate that the dealer has blackjack and skips other play options
+    bool playerBlackjack = false;       // bool used to indicate that the player has blackjack and skips other play options
     char playerChoice;                  // char used for player to enter game choices
     vector<Card> cardStack;             // vector for the entire set of cards
     vector<Card> playerHand;            // vector for the cards in the player's hand
@@ -117,7 +125,9 @@ int main() {
     // Load the cards into the dealing stack
     cardStack = deck.getCards();
 
-    playerBet = placeYourBet(playerBank, MAX_BET);
+    while(true) {
+
+        playerBet = placeYourBet(playerBank, MAX_BET);
 
     /***************** Uncomment this section to print the full deck of cards *********************
     cout << "Cards in the deck:" << endl;
@@ -126,32 +136,168 @@ int main() {
     }
 ****************** Uncomment this section to print the full deck of cards *********************/
 
-    cout << endl << endl;
-
-    // Deal beginning cards - player, dealer, player, dealer
-    srand(time(0));
-    dealCard(cardStack, playerHand);
-    dealCard(cardStack, dealerHand);
-    dealCard(cardStack, playerHand);
-    dealCard(cardStack, dealerHand);
-
-    while (!stand) {
-        displayTable(dealerHand, playerHand, playerBet, stand);
         cout << endl << endl;
-        cout << "Would you like to draw a card or stand (d/s)? ";
-        cin >> playerChoice;
-        while ((tolower(playerChoice) != 'd') && (tolower(playerChoice) != 's')) {
-            cout << "Your entry was not recognized.  Try again: ";
-            cin >> playerChoice;
+
+        // Deal beginning cards - player, dealer, player, dealer
+        srand(time(0));
+        dealCard(cardStack, playerHand);
+        dealCard(cardStack, dealerHand);
+        dealCard(cardStack, playerHand);
+        dealCard(cardStack, dealerHand);
+
+        while (!stand) {
+            displayTable(dealerHand, playerHand, playerBet, stand);
+            if (scoreHand(playerHand) > 21) {
+                changeAce(playerHand);
+                displayTable(dealerHand, playerHand, playerBet, stand);
+            }
+
+            if (scoreHand(dealerHand) > 21) {
+                changeAce(dealerHand);
+                displayTable(dealerHand, playerHand, playerBet, stand);
+            }
+
+            cout << endl << endl;
+            if (dealerHand.at(0).getRank() == "Ace") {
+                if ((scoreHand(playerHand) == 21) && (scoreHand(dealerHand) == 21)) {
+                    cout << endl;
+                    cout << "Both the player and dealer have blackjack." << endl;
+                    cout << "This hand is a push - no winner." << endl << endl;
+                }
+                else {
+                    if (playerBank > (round(playerBet * 0.5))) {
+                        cout << endl;
+                        cout << "Dealer is showing an Ace." << endl;
+                        cout << "Would you like to buy insurance against" << endl;
+                        cout << "the dealer having blackjack (y/n)? ";
+                        cin >> playerChoice;
+                        while ((tolower(playerChoice) != 'y') && (tolower(playerChoice) != 'n')) {
+                            cout << "Your entry was not recognized.  Try again: ";
+                            cin >> playerChoice;
+                        }
+                    }
+                    else {
+                        cout << endl;
+                        playerChoice = 'n';
+                        cout << "Dealer is showing an Ace." << endl;
+                        cout << "You do not have enough points to buy insurance." << endl;
+                        system("pause");
+                    }
+
+                    if (scoreHand(dealerHand) == 21) {
+                        dealerBlackjack = true;
+                        stand = true;
+                        displayTable(dealerHand, playerHand, playerBet, stand);
+                        cout << endl;
+                        cout << "Dealer has blackjack" << endl;
+                        if (playerChoice == 'y') {
+                            cout << endl;
+                            cout << "You purchased insurance." << endl;
+                            cout << "You do not loose your bet." << endl << endl;
+                            playerBank = playerBank - (round(playerBet * 0.5));
+                        }
+                        else {
+                            cout << endl;
+                            cout << "You did not purchase insurance." << endl;
+                            cout << "Dealer wins." << endl << endl;
+                            playerBank = playerBank - playerBet;
+                        }
+                    }
+                    else {
+                        cout << endl;
+                        cout << "Dealer does not have blackjack" << endl;
+                        cout << "play on this hand will continue." << endl << endl;
+                    }
+                }
+            }
+            if (scoreHand(playerHand) == 21) {
+                if (scoreHand(dealerHand) == 21) {
+                    cout << endl;
+                    cout << "Both the player and dealer have blackjack." << endl;
+                    cout << "This hand is a push - no winner." << endl << endl;
+                    dealerBlackjack = true;
+                    playerBlackjack = true;
+                }
+                else {
+                    cout << endl;
+                    cout << "You have blackjack!" << endl;
+                    cout << "You win 1.5x your bet = " << (playerBet * 1.5) << endl << endl;
+                    playerBank = playerBank + (playerBet * 1.5);
+                    playerBlackjack = true;
+                }
+            }
+            if ((!dealerBlackjack) && (!playerBlackjack)) {
+                cout << "Would you like to hit or stand (h/s)? ";
+                cin >> playerChoice;
+                while ((tolower(playerChoice) != 'h') && (tolower(playerChoice) != 's')) {
+                    cout << "Your entry was not recognized.  Try again: ";
+                    cin >> playerChoice;
+                }
+                if (playerChoice == 'h') {
+                    dealCard(cardStack, playerHand);
+                    if (scoreHand(playerHand) > 21) {
+                        changeAce(playerHand);
+                    }
+                }
+                else {
+                    stand = true;
+                }
+                if (scoreHand(playerHand) > 21) {
+                    playerBust = true;
+                    stand = true;
+                }
+                displayTable(dealerHand, playerHand, playerBet, stand);
+            }
         }
-        if (playerChoice == 'd') {
-            dealCard(cardStack, playerHand);
+        if (!dealerBlackjack) {
+            if (playerBust) {
+                cout << endl;
+                cout << "Player Busts - Dealer wins." << endl << endl;
+                playerBank = playerBank - playerBet;
+            }
+
+            if (!playerBust) {
+                while (scoreHand(dealerHand) < 17) {
+                    dealCard(cardStack, dealerHand);
+                    if (scoreHand(dealerHand) > 21) {
+                        changeAce(dealerHand);
+                    }
+                    displayTable(dealerHand, playerHand, playerBet, stand);
+                }
+                if (scoreHand(dealerHand) > 21) {
+                    cout << endl;
+                    cout << "Dealer Busts - Player wins." << endl << endl;
+                    playerBank = playerBank + playerBet;
+                }
+                else {
+                    if (scoreHand(playerHand) == scoreHand(dealerHand)) {
+                        cout << endl;
+                        cout << "Push - no winner." << endl << endl;
+                    }
+                    else if (scoreHand(playerHand) > scoreHand(dealerHand)) {
+                        cout << endl;
+                        cout << "Player wins." << endl << endl;
+                        playerBank = playerBank + playerBet;
+                    }
+                    else {
+                        cout << endl;
+                        cout << "Dealer wins." << endl << endl;
+                        playerBank = playerBank - playerBet;
+                    }
+                }
+            }
         }
-        else {
-            stand = true;
+        stand = false;
+        splitStand = false;
+        playerBust = false;
+        playerSplitBust = false;
+        dealerBlackjack = false;
+        clearHands(dealerHand, playerHand, playerSplitHand);
+        if (cardStack.size() < 20) {
+            reshuffleStack(cardStack, deck);
         }
-        displayTable(dealerHand, playerHand, playerBet, stand);
     }
+
     return 0;
 }
 
@@ -210,6 +356,17 @@ int scoreHand(vector<Card> &hand) {
     return score;
 }
 
+// Function to change the value of an Ace from 11 to 1 ********************
+void changeAce(vector<Card> &hand) {
+    for (int i = 0; i < hand.size(); i++){
+        if ((hand.at(i).getRank() == "Ace") && (hand.at(i).getValue() == 11)) {
+            hand.at(i).setValue(1);
+            i = hand.size();
+        }
+    }
+    return;
+}
+
 // Function to reshuffle the card stack **************************
 void reshuffleStack(vector<Card> &stack, DeckOfCards newDeck) {
     using namespace std::this_thread; // sleep_for, sleep_until
@@ -229,7 +386,7 @@ void reshuffleStack(vector<Card> &stack, DeckOfCards newDeck) {
 
 // Function to display the card table **************************
 void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, int bet, bool stay) {
-    system("CLS");
+    system("cls");
     cout << "YOUR BET = " << bet << endl << endl;
     cout << "PLAYER'S HAND - Total = " << scoreHand(handPlayer) << endl;
     cout << "----------------------------" << endl;
@@ -252,17 +409,6 @@ void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, int bet, b
             cout << setw(6) << right << handDealer.at(i).getRank() << " of " << handDealer.at(i).getSuit() << endl;
         }
     }
-
     cout << endl;
     return;
 }
-
-/*
-
-cardStack.size();			// Return the current number of cards in the stack
-playerHand.clear();			// Clear all the cards from the player's hand before the next hand
-dealerHand.clear();			// Clear all the cards from the dealer's hand before the next hand
-cardStack.clear();			// Clear all the cards out of the stack (do this prior to a reshuffle)
-cardStack = deck.getCards();// Fill the stack with all the cards from the number of decks choosen (acts as a reshuffle)
-
-*/
