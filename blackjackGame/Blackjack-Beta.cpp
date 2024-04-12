@@ -5,6 +5,8 @@
 #include <chrono>
 #include <cmath>
 #include <thread>
+#include <random>
+#include <algorithm>
 
 using namespace std;
 
@@ -52,12 +54,17 @@ public:
             }
         }
     }
-
     // Getters
     const vector<Card>& getCards() const { return cards; }
 
     // Setter (optional)
     void setCards(const vector<Card>& newCards) { cards = newCards; }
+
+    void shuffleDeck() {
+        std::random_device rd;
+        std::mt19937 g(rd());
+        std::shuffle(cards.begin(), cards.end(), g);
+    }
 };
 
 
@@ -116,11 +123,18 @@ int main() {
     cin >> numOfDecks;
     while ((numOfDecks < 1) || (numOfDecks > 6)) {
         cout << endl;
-        cout << "Invalid entry.  Please enter the number of decks from 1-6: ";
         cin >> numOfDecks;
+        if(cin.fail()) { // entering a non-integer entered infinite loop
+            cin.clear(); // clear the error flags
+            cin.ignore(); // ignore any characters in the input buffer
+            cout << "Invalid input. Please enter an integer (1-6)." << endl;
+        }
     }
 
     DeckOfCards deck(numOfDecks);
+
+    // Shuffle the deck
+    deck.shuffleDeck();
 
     // Load the cards into the dealing stack
     cardStack = deck.getCards();
@@ -163,6 +177,7 @@ int main() {
                     cout << endl;
                     cout << "Both the player and dealer have blackjack." << endl;
                     cout << "This hand is a push - no winner." << endl << endl;
+                    break;
                 }
                 else {
                     if (playerBank > (round(playerBet * 0.5))) {
@@ -174,6 +189,13 @@ int main() {
                         while ((tolower(playerChoice) != 'y') && (tolower(playerChoice) != 'n')) {
                             cout << "Your entry was not recognized.  Try again: ";
                             cin >> playerChoice;
+                        }
+                        if (tolower(playerChoice) == 'y') {
+                            cout << endl;
+                            cout << "You purchased insurance." << endl;
+                            cout << "You do not lose your bet." << endl << endl;
+                            playerBank -= round(playerBet * 0.5);
+                            break; // Exit the loop after the insurance decision is made
                         }
                     }
                     else {
@@ -224,6 +246,7 @@ int main() {
                     cout << "You win 1.5x your bet = " << (playerBet * 1.5) << endl << endl;
                     playerBank = playerBank + (playerBet * 1.5);
                     playerBlackjack = true;
+                    break;
                 }
             }
             if ((!dealerBlackjack) && (!playerBlackjack)) {
@@ -314,7 +337,10 @@ int placeYourBet(int availablePoints, int maxBet) {
     cout << endl;
     cout << "How many points would you like to bet? ";
     cin >> inputBet;
+
     while ((inputBet < 0) || (inputBet > maxBet)) {
+        cin.clear(); // avoiding input buffer errors
+        cin.ignore(); // avoiding input buffer errors
         cout << endl;
         cout << "Invalid entry!" << endl;
         cout << "your bet must be between 1 and " << maxBet << " points." << endl;
@@ -374,13 +400,16 @@ void reshuffleStack(vector<Card> &stack, DeckOfCards newDeck) {
     cout << "Time to reshuffle.  The next hand will be played with a new stack." << endl;
     cout << endl;
     cout << "Reshuffling.";
+    stack.clear();
+    stack = newDeck.getCards();
+    std::random_device rd; // Obtain a random seed
+    std::mt19937 rng(rd()); // Initialize the Mersenne Twister pseudo-random number generator
     for (int i = 1; i < 21; i++) {
+        std::shuffle(stack.begin(), stack.end(), rng); // Shuffle the card stack
         cout << ".";
         sleep_for(milliseconds(500));
     }
     cout << endl << endl;
-    stack.clear();
-    stack = newDeck.getCards();
     return;
 }
 
@@ -412,3 +441,4 @@ void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, int bet, b
     cout << endl;
     return;
 }
+
