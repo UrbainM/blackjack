@@ -249,7 +249,7 @@ int main() {
                     break;
                 }
             }
-            if ((!dealerBlackjack) && (!playerBlackjack)) {
+            else {
                 cout << "Would you like to hit or stand (h/s)? ";
                 cin >> playerChoice;
                 while ((tolower(playerChoice) != 'h') && (tolower(playerChoice) != 's')) {
