@@ -33,6 +33,8 @@
 #include <chrono>
 #include <cmath>
 #include <thread>
+#include <random>
+#include <algorithm>
 
 using namespace std;
 
@@ -86,6 +88,12 @@ public:
 
     // Setter (optional)
     void setCards(const vector<Card>& newCards) { cards = newCards; }
+
+    void shuffleDeck() {
+        std::random_device rd; // Random number generator
+        std::mt19937 g(rd()); // 32-bit Mersenne Twister Pseudorandom number generator
+        std::shuffle(cards.begin(), cards.end(), g);
+    }
 };
 
 
@@ -151,6 +159,9 @@ int main() {
     }
 
     DeckOfCards deck(numOfDecks);
+
+    // Shuffle the deck
+    deck.shuffleDeck();
 
     cardStack = deck.getCards();        // Load the cards into the dealing stack
 
@@ -632,13 +643,16 @@ void reshuffleStack(vector<Card> &stack, DeckOfCards newDeck) {
     cout << "Time to reshuffle.  The next hand will be played with a new stack." << endl;
     cout << endl;
     cout << "Reshuffling.";
+    stack.clear();
+    stack = newDeck.getCards();
+    std::random_device rd; // Obtain a random seed
+    std::mt19937 rng(rd()); // Initialize the Mersenne Twister pseudo-random number generator
     for (int i = 1; i < 21; i++) {
+        std::shuffle(stack.begin(), stack.end(), rng); // Shuffle the card stack
         cout << ".";
         sleep_for(milliseconds(500));
     }
     cout << endl << endl;
-    stack.clear();
-    stack = newDeck.getCards();
     return;
 }
 
