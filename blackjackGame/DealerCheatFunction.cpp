@@ -6,7 +6,7 @@ void dealCard(vector<Card> &stack, vector<Card> &hand) {
     cout << endl;
     cout << "*** WHAT CARD TO YOU WANT? *** : ";
     cin >> cheatCard;
-    while ((cheatCard != "1") && (cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
+    while ((cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
            && (cheatCard != "8") && (cheatCard != "9") && (cheatCard != "10") && (cheatCard != "Jack") && (cheatCard != "Queen") && (cheatCard != "King")
            && (cheatCard != "Ace")) {
         cout << "Your entry is not recognized.  Try again: ";
@@ -25,7 +25,7 @@ void dealCard(vector<Card> &stack, vector<Card> &hand) {
             cout << "There are no more " << cheatCard << "'s in the stack." << endl;
             cout << "Choose a different card. ";
             cin >> cheatCard;
-            while ((cheatCard != "1") && (cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
+            while ((cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
                    && (cheatCard != "8") && (cheatCard != "9") && (cheatCard != "10") && (cheatCard != "Jack") && (cheatCard != "Queen") && (cheatCard != "King")
                    && (cheatCard != "Ace")) {
                 cout << "Your entry is not recognized.  Try again: ";
