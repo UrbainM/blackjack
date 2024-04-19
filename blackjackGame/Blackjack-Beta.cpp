@@ -152,13 +152,8 @@ int main() {
     cout << "This game uses traditional casino rules for a single player" << endl;
     cout << "to play blackjack against the house (the computer)." << endl;
     cout << endl;
-    cout << "How many decks of cards do you want in the stack (1-6): ";
-    cin >> numOfDecks;
-    while ((numOfDecks < 1) || (numOfDecks > 6)) {
-        cout << endl;
-        cout << "Invalid entry.  Please enter the number of decks from 1-6: ";
-        cin >> numOfDecks;
-    }
+
+    numOfDecks = getIntInput("How many decks of cards do you want in the stack (1-6): ",1,6);
 
     DeckOfCards deck(numOfDecks);
 
