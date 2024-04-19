@@ -120,6 +120,8 @@ void reshuffleStack(vector<Card> &stack, DeckOfCards);
 void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, int bet, bool stay);
 void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card> &handSplit, int bet, int splitBet, bool stay, bool splitStay);
 
+//Function to get numerical input from the user
+int getIntInput(const string& prompt, int min, int max);
 
 int main() {
     // Create a new deck of cards
@@ -581,16 +583,7 @@ int placeYourBet(int availablePoints, int maxBet) {
     cout << "you may bet 1 to " << maxBet << " points." << endl;
     cout << "Enter 0 to end the game." << endl;
     cout << endl;
-    cout << "How many points would you like to bet? ";
-    cin >> inputBet;
-    while ((inputBet < 0) || (inputBet > maxBet)) {
-        cout << endl;
-        cout << "Invalid entry!" << endl;
-        cout << "your bet must be between 1 and " << maxBet << " points." << endl;
-        cout << endl;
-        cout << "How many points would you like to bet? ";
-        cin >> inputBet;
-    }
+    inputBet = getIntInput("How many points would you like to bet? (0 to exit):",0,maxBet);
     if (inputBet == 0) {
         cout <<endl;
         cout << "Thank you for playing." << endl;
@@ -720,4 +713,22 @@ void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Car
     }
     cout << endl;
     return;
+}
+
+int getIntInput(const string& prompt, int min, int max) {
+    int userInput;
+    while (true) {
+        cout << prompt;
+        cin >> userInput;
+
+        // Check if input failed or if input is out of range
+        if (cin.fail() || userInput < min || userInput > max) {
+            cin.clear();  // Clear the error flag
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Clear the input buffer
+            cout << "Invalid input. Please enter a number between " << min << " and " << max << ".\n";
+        } else {
+            break;  // Input is valid, break out of the loop
+        }
+    }
+    return userInput;
 }
