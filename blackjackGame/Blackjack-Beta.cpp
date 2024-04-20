@@ -570,6 +570,13 @@ int main() {
 // Function for player to place a bet *************************
 int placeYourBet(int availablePoints, int maxBet) {
     int inputBet;
+    if (availablePoints <= 0) {
+        cout << endl;
+        cout << "You are out of point." << endl;
+        cout << "GAME OVER." << endl;
+        cout << endl;
+        exit(0);
+    }
     if (availablePoints < maxBet) {
         maxBet = availablePoints;
     }
