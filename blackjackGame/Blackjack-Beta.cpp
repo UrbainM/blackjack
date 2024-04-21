@@ -99,10 +99,10 @@ public:
 
 
 // Declare function to place a bet
-int placeYourBet(int, int);
+int placeYourBet(int, int, bool*);
 
 // Declare function to deal a card
-void dealCard(vector<Card> &stack, vector<Card> &hand);
+void dealCard(vector<Card> &stack, vector<Card> &hand, bool, bool);
 
 // Declare function to clear the player's and dealer's hand after a round ends
 void clearHands(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card> &handSplit);
@@ -120,8 +120,8 @@ void reshuffleStack(vector<Card> &stack, DeckOfCards);
 void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, int bet, bool stay);
 void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Card> &handSplit, int bet, int splitBet, bool stay, bool splitStay);
 
-//Function to get numerical input from the user
-int getIntInput(const string& prompt, int min, int max);
+//Declare a function to get numerical input from the user
+int getIntInput(const string& prompt);
 
 int main() {
     // Create a new deck of cards
@@ -135,13 +135,14 @@ int main() {
     int playerSplitBet = 0;             // amount of points the player will bet on the 2nd hand of a split
     int playerBank = STARTING_PIONTS;   // used for live total of the player's available points
     bool stand = false;                 // bool to use for the player to stand or not - also used to skip other play options
-    bool playerSplit = false;            // bool to use of player choose to split.
+    bool playerSplit = false;           // bool to use of player choose to split.
     bool splitStand = false;            // bool to use for the player to stand or not on the split hand - also used to skip other play options
     bool playerBust = false;            // bool used to indicate if the player's hand is bust or not
     bool playerSplitBust = false;       // bool used to indicate if the player's split hand is bust or not
     bool dealerBlackjack = false;       // bool used to indicate that the dealer has blackjack and skips other play options
     bool playerBlackjack = false;       // bool used to indicate that the player has blackjack and skips other play options
     bool playerSplitBlackjack = false;  // bool used to indicate that the player split has blackjack and skips other play options
+    bool cheatCode = false;             // bool used for the player to activate or deactivate a way to "cheat"
     char playerChoice;                  // char used for player to enter game choices
     vector<Card> cardStack;             // vector for the entire set of cards
     vector<Card> playerHand;            // vector for the cards in the player's hand
@@ -153,7 +154,12 @@ int main() {
     cout << "to play blackjack against the house (the computer)." << endl;
     cout << endl;
 
-    numOfDecks = getIntInput("How many decks of cards do you want in the stack (1-6): ",1,6);
+    numOfDecks = getIntInput("How many decks of cards do you want in the stack (1-6): ");
+    while ((numOfDecks < 1) || (numOfDecks > 6)) {
+        cout << endl;
+        cout << "Invalid entry.  Please enter a number from 1-6." << endl;
+        numOfDecks = getIntInput("How many decks of cards do you want in the stack (1-6): ");
+    }
 
     DeckOfCards deck(numOfDecks);
 
@@ -162,23 +168,23 @@ int main() {
 
     cardStack = deck.getCards();        // Load the cards into the dealing stack
 
-// ******************** THIS IS THE BEGINNING OF THE GAME LOOP ********************
+    // ******************** THIS IS THE BEGINNING OF THE GAME LOOP ********************
     while(true) {
 
-        playerBet = placeYourBet(playerBank, MAX_BET);
+        playerBet = placeYourBet(playerBank, MAX_BET, &cheatCode);
 
         cout << endl << endl;
 
-// Deal beginning cards - player, dealer, player, dealer
+        // Deal beginning cards - player, dealer, player, dealer
         srand(time(0));
-        dealCard(cardStack, playerHand);
-        dealCard(cardStack, dealerHand);
-        dealCard(cardStack, playerHand);
-        dealCard(cardStack, dealerHand);
+        dealCard(cardStack, playerHand, cheatCode, true);
+        dealCard(cardStack, dealerHand, cheatCode, false);
+        dealCard(cardStack, playerHand, cheatCode, true);
+        dealCard(cardStack, dealerHand, cheatCode, false);
 
         displayTable(dealerHand, playerHand, playerBet, stand);
 
-// ******************** CHECH IF DEALER IS SHOWING AN ACE - OFFER INSURANCE ********************
+        // ******************** CHECH IF DEALER IS SHOWING AN ACE - OFFER INSURANCE ********************
         if (dealerHand.at(0).getRank() == "Ace") {
             if ((scoreHand(playerHand) == 21) && (scoreHand(dealerHand) == 21)) {
                 cout << endl;
@@ -235,7 +241,7 @@ int main() {
             }
         }
 
-// ******************** CHECK IF ONLY THE PLAYER HAS BLACKJACK ********************
+        // ******************** CHECK IF ONLY THE PLAYER HAS BLACKJACK ********************
         if (!stand) {
             if (scoreHand(playerHand) == 21) {
                 playerBlackjack = true;
@@ -248,7 +254,7 @@ int main() {
             }
         }
 
-// ******************** CHECK IF THE PLAYER IS ABLE TO DOUBLE-DOWN ********************
+        // ******************** CHECK IF THE PLAYER IS ABLE TO DOUBLE-DOWN ********************
         if ((scoreHand(playerHand) >= 9) && (scoreHand(playerHand) <= 11) && (!dealerBlackjack)) {
             if (playerBank >= playerBet) {
                 cout << endl;
@@ -261,7 +267,7 @@ int main() {
                 }
                 if (playerChoice == 'y') {
                     playerBet = playerBet * 2;
-                    dealCard(cardStack, playerHand);
+                    dealCard(cardStack, playerHand, cheatCode, true);
                     if (scoreHand(playerHand) > 21) {
                         changeAce(playerHand);
                     }
@@ -276,7 +282,7 @@ int main() {
             }
         }
 
-// ******************** CHECK IF THE PLAYER IS ABLE TO SPLIT ********************
+        // ******************** CHECK IF THE PLAYER IS ABLE TO SPLIT ********************
         if (!stand) {
             if (playerHand.at(0).getRank() == playerHand.at(1).getRank()) {
                 if (playerBank >= playerBet) {
@@ -293,7 +299,7 @@ int main() {
                         playerSplit = true;
                         playerSplitHand.push_back(playerHand.at(1));
                         playerHand.erase(playerHand.end());
-                        dealCard(cardStack, playerHand);
+                        dealCard(cardStack, playerHand, cheatCode, true);
                     }
                 }
                 else {
@@ -304,7 +310,7 @@ int main() {
             }
         }
 
-// *************************** Play this section if player does not split hand ********************************
+        // *************************** Play this section if player does not split hand ********************************
         if (!playerSplit) {
             while (!stand) {
                 displayTable(dealerHand, playerHand, playerBet, stand);
@@ -327,7 +333,7 @@ int main() {
                         cin >> playerChoice;
                     }
                     if (playerChoice == 'h') {
-                        dealCard(cardStack, playerHand);
+                        dealCard(cardStack, playerHand, cheatCode, true);
                         if (scoreHand(playerHand) > 21) {
                             changeAce(playerHand);
                         }
@@ -351,7 +357,7 @@ int main() {
 
                 if ((!playerBust) && (!playerBlackjack)) {
                     while (scoreHand(dealerHand) < 17) {
-                        dealCard(cardStack, dealerHand);
+                        dealCard(cardStack, dealerHand, cheatCode, false);
                         if (scoreHand(dealerHand) > 21) {
                             changeAce(dealerHand);
                         }
@@ -382,7 +388,7 @@ int main() {
             }
         }
 
-// ****************************** Play this section if player splits hand ***************************************
+        // ****************************** Play this section if player splits hand ***************************************
         if (playerSplit) {
             if (scoreHand(playerHand) == 21) {
                 playerBlackjack = true;
@@ -415,7 +421,7 @@ int main() {
                         cin >> playerChoice;
                     }
                     if (playerChoice == 'h') {
-                        dealCard(cardStack, playerHand);
+                        dealCard(cardStack, playerHand, cheatCode, true);
                         if (scoreHand(playerHand) > 21) {
                             changeAce(playerHand);
                         }
@@ -431,9 +437,9 @@ int main() {
                 }
             }
 
-        // *** END PLAYING THE MAIN HAND AND BEGIN PLAYING THE SPLIT HAND ***
+            // *** END PLAYING THE MAIN HAND AND BEGIN PLAYING THE SPLIT HAND ***
 
-            dealCard(cardStack, playerSplitHand);
+            dealCard(cardStack, playerSplitHand, cheatCode, true);
             while (!splitStand) {
                 if (scoreHand(playerSplitHand) == 21) {
                     playerSplitBlackjack = true;
@@ -458,7 +464,7 @@ int main() {
                         cin >> playerChoice;
                     }
                     if (playerChoice == 'h') {
-                        dealCard(cardStack, playerSplitHand);
+                        dealCard(cardStack, playerSplitHand, cheatCode, true);
                         if (scoreHand(playerSplitHand) > 21) {
                             changeAce(playerSplitHand);
                         }
@@ -487,13 +493,13 @@ int main() {
 
                 if (((!playerBust) && (!playerSplitBust)) && ((!playerBlackjack) && (!playerSplitBlackjack))) {
                     while (scoreHand(dealerHand) < 17) {
-                        dealCard(cardStack, dealerHand);
+                        dealCard(cardStack, dealerHand, cheatCode, false);
                         if (scoreHand(dealerHand) > 21) {
                             changeAce(dealerHand);
                         }
                         displayTable(dealerHand, playerHand, playerSplitHand, playerBet, playerSplitBet, stand, splitStand);
                     }
-      //****************************** check if both hands win or just 1 *****************************
+                    //****************************** check if both hands win or just 1 *****************************
                     if (scoreHand(dealerHand) > 21) {
                         cout << endl;
                         if (!playerBust) {
@@ -568,15 +574,8 @@ int main() {
 
 
 // Function for player to place a bet *************************
-int placeYourBet(int availablePoints, int maxBet) {
+int placeYourBet(int availablePoints, int maxBet, bool *cheat) {
     int inputBet;
-    if (availablePoints <= 0) {
-        cout << endl;
-        cout << "You are out of point." << endl;
-        cout << "GAME OVER." << endl;
-        cout << endl;
-        exit(0);
-    }
     if (availablePoints < maxBet) {
         maxBet = availablePoints;
     }
@@ -585,7 +584,31 @@ int placeYourBet(int availablePoints, int maxBet) {
     cout << "you may bet 1 to " << maxBet << " points." << endl;
     cout << "Enter 0 to end the game." << endl;
     cout << endl;
-    inputBet = getIntInput("How many points would you like to bet? (0 to exit):",0,maxBet);
+    inputBet = getIntInput("How many points would you like to bet? (0 to exit): ");
+    if (*cheat == false && inputBet == 12345) {
+        *cheat = true;
+        cout << endl;
+        cout << "CHEAT CODE IS ACTIVATED!!!" << endl;
+        cout << "You will now be asked to choose the rank of every card delt." << endl;
+        cout << "You will need to enter - 2, 3, 4, 5, 6, 7, 8, 9 ,10, Jack, Queen, King, Ace." << endl;
+        cout << endl;
+        cout << "Now enter your actual bet." << endl;
+        inputBet = getIntInput("How many points would you like to bet? (0 to exit): ");
+    }
+    if (*cheat == true && inputBet == 54321) {
+        *cheat = false;
+        cout << endl;
+        cout << "CHEAT CODE IS DEACTIVATED!!!" << endl;
+        cout << endl;
+        cout << "Now enter your actual bet." << endl;
+        inputBet = getIntInput("How many points would you like to bet? (0 to exit): ");
+    }
+    while ((inputBet < 0) || (inputBet > maxBet)) {
+        cout << endl;
+        cout << "Invalid entry!" << endl;
+        cout << "your bet must be between 1 and " << maxBet << " points." << endl;
+        inputBet = getIntInput("How many points would you like to bet? (0 to exit): ");
+    }
     if (inputBet == 0) {
         cout <<endl;
         cout << "Thank you for playing." << endl;
@@ -596,10 +619,53 @@ int placeYourBet(int availablePoints, int maxBet) {
 }
 
 // Function to deal a card to a hand ***************************
-void dealCard(vector<Card> &stack, vector<Card> &hand) {
-    int randomCard = (rand()%(stack.size()));
-    hand.push_back(stack.at(randomCard));
-    stack.erase((stack.begin() + randomCard));
+void dealCard(vector<Card> &stack, vector<Card> &hand, bool cheat, bool cardToPlayer) {
+    if (!cheat) {
+        int randomCard = (rand()%(stack.size()));
+        hand.push_back(stack.at(randomCard));
+        stack.erase((stack.begin() + randomCard));
+    }
+    else {
+        string cheatCard;
+        string cardToDeal;
+        bool cardFound = false;
+        if (cardToPlayer) {
+            cardToDeal = "player";
+        }
+        else {
+            cardToDeal = "dealer";
+        }
+        cout << endl;
+        cout << "*** Choose a card for the " << cardToDeal << ": ";
+        cin >> cheatCard;
+        while ((cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
+               && (cheatCard != "8") && (cheatCard != "9") && (cheatCard != "10") && (cheatCard != "Jack") && (cheatCard != "Queen") && (cheatCard != "King")
+               && (cheatCard != "Ace")) {
+            cout << "Your entry is not recognized.  Try again: ";
+            cin >> cheatCard;
+        }
+        while (!cardFound) {
+            for (int i = 0; i < stack.size(); i++){
+                if (stack.at(i).getRank() == cheatCard) {
+                    hand.push_back(stack.at(i));
+                    stack.erase((stack.begin() + i));
+                    cardFound = true;
+                    i = stack.size();
+                }
+            }
+            if (!cardFound) {
+                cout << "There are no more " << cheatCard << "'s in the stack." << endl;
+                cout << "Choose a different card. ";
+                cin >> cheatCard;
+                while ((cheatCard != "2") && (cheatCard != "3") && (cheatCard != "4") && (cheatCard != "5") && (cheatCard != "6") && (cheatCard != "7")
+                       && (cheatCard != "8") && (cheatCard != "9") && (cheatCard != "10") && (cheatCard != "Jack") && (cheatCard != "Queen") && (cheatCard != "King")
+                       && (cheatCard != "Ace")) {
+                    cout << "Your entry is not recognized.  Try again: ";
+                    cin >> cheatCard;
+                }
+            }
+        }
+    }
     return;
 }
 
@@ -717,17 +783,20 @@ void displayTable(vector<Card> &handDealer, vector<Card> &handPlayer, vector<Car
     return;
 }
 
-int getIntInput(const string& prompt, int min, int max) {
+// Function to get numerical input from the user **************************
+int getIntInput(const string& prompt) {
     int userInput;
     while (true) {
         cout << prompt;
         cin >> userInput;
 
         // Check if input failed or if input is out of range
-        if (cin.fail() || userInput < min || userInput > max) {
+        if (cin.fail()) {
             cin.clear();  // Clear the error flag
             cin.ignore(numeric_limits<streamsize>::max(), '\n');  // Clear the input buffer
-            cout << "Invalid input. Please enter a number between " << min << " and " << max << ".\n";
+            cout << endl;
+            cout << "Your entry was not a number.  Please try again." << endl;
+            cout << endl;
         } else {
             break;  // Input is valid, break out of the loop
         }
